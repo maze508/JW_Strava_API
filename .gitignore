@@ -3,3 +3,4 @@ venv
 IMAGES
 __pycache__
 .vscode
+.idea
