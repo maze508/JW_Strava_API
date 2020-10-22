@@ -4,6 +4,7 @@ import gspread
 from oauth2client.service_account import ServiceAccountCredentials
 import schedule
 import time
+import env
 
 
 # Main Function
@@ -17,10 +18,10 @@ def main():
     #! NOTE : Did not specifically go into running Selenium on Batch Files. Seems a little too complicated for project scale. Can explore for "easier" user experience
     options = webdriver.ChromeOptions()
     options.add_argument("headless")
-    driver = webdriver.Chrome(executable_path = r"C:\Users\Admin\Documents\chromedriver.exe", chrome_options=options)
+    driver = webdriver.Chrome(executable_path = PATH_TO_CHROME_DRIVER, chrome_options=options)
 
     # API Request URL
-    driver.get('https://www.strava.com/clubs/midswing')
+    driver.get(LEADERBOARDS_WEBSITE)
 
     # Find the Search Button and return the specified search results
 
@@ -88,12 +89,11 @@ def main():
 
     # Exports data to csv and saves as backup
     #! Optional (Maybe good to safe just in case)
-    df.to_csv(r"C:\Users\Admin\Desktop\Work\Jiaweis_API\strava_leaderboards.csv", index=False)
+    df.to_csv(LOCATION_TO_DOWNLOAD_CSV, index=False)
 
 
     scope = ['https://www.googleapis.com/auth/spreadsheets', "https://www.googleapis.com/auth/drive.file", "https://www.googleapis.com/auth/drive"]
 
-    # READ ME REFER TO `https://www.youtube.com/watch?v=w533wJuilao`
     #! Note that Sharing should untick Notify me box
     #! Note that should enable both google sheets and google docs api
 
