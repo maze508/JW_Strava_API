@@ -4,37 +4,32 @@ import gspread
 from oauth2client.service_account import ServiceAccountCredentials
 import schedule
 import time
-import env
+from env import *
 
 
 # Main Function
 def main():
     # Finds the driver location (For Selenium)
-    #* TO Download Chrome Driver :
-        # Go to `https://sites.google.com/a/chromium.org/chromedriver/`
-        # Down load "Latest stable release: ChromeDriver 86.0.4240.22"
-        # Find its path and change the paths under executable path)
     # Add Headless Options to prevent Chrome Browser from Opening whenever it runs 
-    #! NOTE : Did not specifically go into running Selenium on Batch Files. Seems a little too complicated for project scale. Can explore for "easier" user experience
+    #! NOTE : Did not specifically go into running Selenium on Batch Files. Seems a little too complicated for project scale.
     options = webdriver.ChromeOptions()
     options.add_argument("headless")
+    # Init Driver
     driver = webdriver.Chrome(executable_path = PATH_TO_CHROME_DRIVER, chrome_options=options)
 
     # API Request URL
     driver.get(LEADERBOARDS_WEBSITE)
 
-    # Find the Search Button and return the specified search results
 
     # Finds the Table Headers
     table_headers = []
     for items in driver.find_elements_by_xpath("//div[@class='leaderboard']/table/thead//th"):
         table_headers.append(items.text)
 
-    # Defining Arrays Used later on
+    # Defining Arrays/Lists Used later on
     table_rows = []
     myrow = []
     master_list = []
-
     rank_list = []
     name_list = []
     distance_list = []
@@ -52,12 +47,13 @@ def main():
         for items in driver.find_elements_by_xpath("//div[@class='leaderboard']/table/tbody//tr["+str(i+1)+"]/td"):
             myrow.append(items.text)
 
-        # Master List
+        # Adds content to Master List
         master_list.extend(myrow)
 
+    # Quit driver before post processing to save RAM D;
     driver.quit()
 
-    # Filters the data and sorts in
+    # Filters data and sorts it
     for i, x in enumerate(master_list):
         if i == 0 or i % 7 == 0:
             rank_list.append(x)
@@ -74,7 +70,7 @@ def main():
         elif i == 6 or (i-6) % 7 == 0:
             elev_gain_list.append(x)
 
-    # Stuff all the data into the dataframe to be exported
+    # Pack all the data into a pd Dataframe for exporting
     df = pd.DataFrame(
         {
             'Rank': rank_list,
@@ -87,15 +83,11 @@ def main():
         }
     )
 
-    # Exports data to csv and saves as backup
+    # Exports data to a .csv file for backup
     #! Optional (Maybe good to safe just in case)
     df.to_csv(LOCATION_TO_DOWNLOAD_CSV, index=False)
 
-
     scope = ['https://www.googleapis.com/auth/spreadsheets', "https://www.googleapis.com/auth/drive.file", "https://www.googleapis.com/auth/drive"]
-
-    #! Note that Sharing should untick Notify me box
-    #! Note that should enable both google sheets and google docs api
 
     # Read User credentials for API key
     creds = ServiceAccountCredentials.from_json_keyfile_name('client_secret.json', scope)
@@ -115,7 +107,7 @@ def main():
 main()
 
 # Runs Script Every (User Defined) Minute(s)
-schedule.every(30).minutes.do(main)
+schedule.every(UPLOAD_TO_GOOGLE_SHEETS_INTERVAL_MINUTES).minutes.do(main)
 print('~~~~~~~~~~~~~~~~~~~~~~~')
 print()
 print('~~~~~~~~~~~~~~~~~~~~~~~')
