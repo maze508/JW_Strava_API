@@ -96,7 +96,7 @@ def main():
     client = gspread.authorize(creds)
 
     # Uploads the sheet to the first sheet (sheet1) of "Strava" Google Sheets
-    worksheet = client.open("Strava").sheet1
+    worksheet = client.open(NAME_OF_GOOGLE_SHEET).sheet1
 
     # Auto Updates the Google Sheets
     worksheet.update([df.columns.values.tolist()] + df.values.tolist())
